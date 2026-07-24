@@ -20,14 +20,14 @@ const camera = new THREE.OrthographicCamera(-viewD * aspect, viewD * aspect, vie
 camera.position.set(16, 13, 16);
 camera.lookAt(0, 1.4, 0);
 
-const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
 renderer.setSize(innerWidth, innerHeight);
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setPixelRatio(Math.min(devicePixelRatio, isMobile ? 1.25 : 1.75));
 renderer.outputEncoding = THREE.sRGBEncoding;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 0.95;
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.shadowMap.type = isMobile ? THREE.BasicShadowMap : THREE.PCFSoftShadowMap;
 mount.appendChild(renderer.domElement);
 
 const labelRenderer = new THREE.CSS2DRenderer();
@@ -41,7 +41,7 @@ scene.add(new THREE.AmbientLight(0xffffff, 0.18));
 const sun = new THREE.DirectionalLight(0xfffaed, 0.75);
 sun.position.set(12, 20, 10);
 sun.castShadow = true;
-sun.shadow.mapSize.set(isMobile ? 1024 : 2048, isMobile ? 1024 : 2048);
+sun.shadow.mapSize.set(isMobile ? 512 : 2048, isMobile ? 512 : 2048);
 sun.shadow.camera.left = -16; sun.shadow.camera.right = 16;
 sun.shadow.camera.top = 16; sun.shadow.camera.bottom = -16;
 sun.shadow.camera.near = 1; sun.shadow.camera.far = 50;
