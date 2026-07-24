@@ -203,9 +203,31 @@ function makeCloud() {
 }
 
 // ---------- GLTF 載入器與動態重試機制（解決手機端腳本載入時間差問題）----------
+const loadingManager = new THREE.LoadingManager();
+const loaderBar = document.getElementById('loader-bar');
+const loaderPct = document.getElementById('loader-pct');
+
+loadingManager.onProgress = (url, loaded, total) => {
+  const pct = Math.min(Math.round((loaded / total) * 100), 100);
+  if (loaderBar) loaderBar.style.width = pct + '%';
+  if (loaderPct) loaderPct.textContent = pct + '%';
+};
+
+loadingManager.onLoad = () => {
+  if (loaderBar) loaderBar.style.width = '100%';
+  if (loaderPct) loaderPct.textContent = '100%';
+  setTimeout(() => {
+    const loaderEl = document.getElementById('loader');
+    const introEl = document.getElementById('intro');
+    if (loaderEl) loaderEl.classList.add('hidden');
+    if (introEl) introEl.classList.remove('hidden');
+  }, 450);
+};
+
 function getGLTFLoader() {
   if (typeof THREE !== 'undefined' && THREE.GLTFLoader) {
-    return new THREE.GLTFLoader();
+    const l = new THREE.GLTFLoader(loadingManager);
+    return l;
   }
   return null;
 }
@@ -482,10 +504,14 @@ function enter() {
   setTimeout(() => document.getElementById('hint').classList.add('hidden'), 6000);
 }
 document.getElementById('enter-btn').addEventListener('click', enter);
-addEventListener('load', () => setTimeout(() => {
-  document.getElementById('loader').classList.add('hidden');
-  document.getElementById('intro').classList.remove('hidden');
-}, 500));
+// 安全備用退場機制（若網路異常，最長 6 秒後強行顯示首頁）
+setTimeout(() => {
+  const loaderEl = document.getElementById('loader');
+  if (loaderEl && !loaderEl.classList.contains('hidden')) {
+    loaderEl.classList.add('hidden');
+    if (document.getElementById('intro')) document.getElementById('intro').classList.remove('hidden');
+  }
+}, 6000);
 
 // ============================================================
 //  動畫
