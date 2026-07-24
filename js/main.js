@@ -202,32 +202,37 @@ function makeCloud() {
   return g;
 }
 
-// ---------- GLTF 載入器與動態重試機制（解決手機端腳本載入時間差問題）----------
-const loadingManager = new THREE.LoadingManager();
-const loaderBar = document.getElementById('loader-bar');
-const loaderPct = document.getElementById('loader-pct');
+// ---------- 3D 模型載入進度與完全載入控制 ----------
+let modelsLoadedCount = 0;
+const TOTAL_GLB_MODELS = 3; // boiler.glb, crane.glb, factory.glb
 
-loadingManager.onProgress = (url, loaded, total) => {
-  const pct = Math.min(Math.round((loaded / total) * 100), 100);
+function onModelLoaded() {
+  modelsLoadedCount++;
+  const pct = Math.min(Math.round((modelsLoadedCount / TOTAL_GLB_MODELS) * 100), 100);
+  
+  const loaderBar = document.getElementById('loader-bar');
+  const loaderPct = document.getElementById('loader-pct');
   if (loaderBar) loaderBar.style.width = pct + '%';
   if (loaderPct) loaderPct.textContent = pct + '%';
-};
 
-loadingManager.onLoad = () => {
-  if (loaderBar) loaderBar.style.width = '100%';
-  if (loaderPct) loaderPct.textContent = '100%';
-  setTimeout(() => {
-    const loaderEl = document.getElementById('loader');
-    const introEl = document.getElementById('intro');
-    if (loaderEl) loaderEl.classList.add('hidden');
-    if (introEl) introEl.classList.remove('hidden');
-  }, 450);
-};
+  // 必須當 3D 模型 100% 全數載入完畢，才淡出載入畫面並呈現首頁
+  if (modelsLoadedCount >= TOTAL_GLB_MODELS) {
+    setTimeout(() => {
+      const loaderEl = document.getElementById('loader');
+      const introEl = document.getElementById('intro');
+      if (loaderEl) loaderEl.classList.add('hidden');
+      if (introEl) introEl.classList.remove('hidden');
+    }, 450);
+  }
+}
 
 function getGLTFLoader() {
   if (typeof THREE !== 'undefined' && THREE.GLTFLoader) {
-    const l = new THREE.GLTFLoader(loadingManager);
-    return l;
+    const loader = new THREE.GLTFLoader();
+    if (typeof MeshoptDecoder !== 'undefined') {
+      loader.setMeshoptDecoder(MeshoptDecoder);
+    }
+    return loader;
   }
   return null;
 }
@@ -235,10 +240,11 @@ function getGLTFLoader() {
 function loadGLTFModel(url, targetHeight, shadow = true, onComplete, retryCount = 0) {
   const loader = getGLTFLoader();
   if (!loader) {
-    if (retryCount < 15) {
-      setTimeout(() => loadGLTFModel(url, targetHeight, shadow, onComplete, retryCount + 1), 250);
+    if (retryCount < 20) {
+      setTimeout(() => loadGLTFModel(url, targetHeight, shadow, onComplete, retryCount + 1), 200);
     } else {
       console.warn(`[GLTF Load Error] GLTFLoader 腳本逾時未載入: ${url}`);
+      onModelLoaded(); // 計數累加避免卡死
     }
     return;
   }
@@ -275,9 +281,13 @@ function loadGLTFModel(url, targetHeight, shadow = true, onComplete, retryCount 
       const container = new THREE.Group();
       container.add(model);
       onComplete(container, gltf);
+      onModelLoaded(); // 載入完成通知
     },
     undefined,
-    (err) => console.warn(`[GLTF Load Error] 無法載入模型 ${url}:`, err)
+    (err) => {
+      console.warn(`[GLTF Load Error] 無法載入模型 ${url}:`, err);
+      onModelLoaded(); // 即使出錯也累加計數避免畫面卡住
+    }
   );
 }
 
