@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#7fc9ec" />
+  <title>115年度代行檢查機構年終考評 · 3D 互動工廠</title>
+
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <!-- 3D 畫布掛載點 -->
+  <div id="scene"></div>
+
+  <!-- 頂部標題列（進入後顯示） -->
+  <header id="topbar" class="hidden">
+    <span class="dot"></span>
+    <span class="topbar-title">115年度代行檢查機構年終考評</span>
+  </header>
+
+  <!-- 底部操作提示 -->
+  <div id="hint" class="hidden"></div>
+
+  <!-- 載入畫面 -->
+  <div id="loader">
+    <div class="loader-core"></div>
+    <div class="loader-text">INSPECTION SYSTEM BOOTING<span class="ell">…</span></div>
+  </div>
+
+  <!-- 進場 / 標題畫面 -->
+  <section id="intro" class="hidden">
+    <div class="intro-inner">
+      <div class="intro-tag">INDUSTRIAL SAFETY INSPECTION</div>
+      <h1 id="intro-title"></h1>
+      <div id="intro-sub" class="intro-sub"></div>
+      <button id="enter-btn">
+        <span class="enter-glow"></span>
+        <span id="enter-label">進入考評</span>
+      </button>
+    </div>
+    <div class="scanline"></div>
+  </section>
+
+  <!-- 內容面板 -->
+  <aside id="panel" class="hidden" aria-hidden="true">
+    <button id="panel-close" aria-label="關閉">✕</button>
+    <div class="panel-head">
+      <div class="panel-en" id="panel-en"></div>
+      <h2 id="panel-title"></h2>
+      <p id="panel-intro"></p>
+    </div>
+    <div id="panel-body"></div>
+  </aside>
+  <div id="panel-backdrop" class="hidden"></div>
+
+  <!-- Three.js r128（傳統版，雙擊也能開，不受 file:// 限制） -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/renderers/CSS2DRenderer.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+
+  <script src="js/data.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
