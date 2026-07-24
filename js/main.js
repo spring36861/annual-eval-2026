@@ -202,12 +202,26 @@ function makeCloud() {
   return g;
 }
 
-// ---------- GLTF 載入器與自動縮放置換功能 ----------
-const gltfLoader = (typeof THREE !== 'undefined' && THREE.GLTFLoader) ? new THREE.GLTFLoader() : null;
+// ---------- GLTF 載入器與動態重試機制（解決手機端腳本載入時間差問題）----------
+function getGLTFLoader() {
+  if (typeof THREE !== 'undefined' && THREE.GLTFLoader) {
+    return new THREE.GLTFLoader();
+  }
+  return null;
+}
 
-function loadGLTFModel(url, targetHeight, shadow = true, onComplete) {
-  if (!gltfLoader) return;
-  gltfLoader.load(
+function loadGLTFModel(url, targetHeight, shadow = true, onComplete, retryCount = 0) {
+  const loader = getGLTFLoader();
+  if (!loader) {
+    if (retryCount < 15) {
+      setTimeout(() => loadGLTFModel(url, targetHeight, shadow, onComplete, retryCount + 1), 250);
+    } else {
+      console.warn(`[GLTF Load Error] GLTFLoader 腳本逾時未載入: ${url}`);
+    }
+    return;
+  }
+
+  loader.load(
     url,
     (gltf) => {
       const model = gltf.scene;
